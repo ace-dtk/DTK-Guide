@@ -189,6 +189,14 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem;position:relative;z
 .lang-btn{font-family:‘IBM Plex Mono’,monospace;font-size:0.58rem;padding:3px 7px;border:1px solid var(–border);border-radius:2px;background:none;color:var(–text-muted);cursor:pointer;letter-spacing:0.06em;transition:all 0.15s;}
 .lang-btn:hover{border-color:var(–gold-dim);color:var(–gold);}
 .lang-btn.active{background:rgba(201,168,76,0.12);border-color:var(–gold);color:var(–gold);}
+/* GOOGLE TRANSLATE */
+#google_translate_element{flex-shrink:0;}
+#google_translate_element .goog-te-gadget{font-family:‘IBM Plex Mono’,monospace!important;font-size:0!important;color:transparent!important;}
+#google_translate_element .goog-te-gadget span{display:none;}
+#google_translate_element select.goog-te-combo{background:var(–surface2);border:1px solid var(–border-bright);border-radius:2px;color:var(–text-dim);font-family:‘IBM Plex Mono’,monospace;font-size:0.6rem;padding:3px 6px;cursor:pointer;outline:none;letter-spacing:0.06em;transition:border-color 0.15s;}
+#google_translate_element select.goog-te-combo:hover{border-color:var(–gold-dim);color:var(–gold);}
+.goog-te-banner-frame{display:none!important;}
+body{top:0!important;}
 /* FOOTER */
 .power-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0.65rem;}
 
@@ -263,11 +271,7 @@ nav{display:none;}
       <a onclick="showPage('dtk')" id="nav-dtk" class="dtk-link">⚔ DTK</a>
       <a onclick="openSearch()" style="color:var(--text-muted)">🔍</a>
     </nav>
-    <div class="lang-switcher">
-      <button class="lang-btn active" onclick="setLang('en')" id="lang-en">EN</button>
-      <button class="lang-btn" onclick="setLang('fr')" id="lang-fr">FR</button>
-      <button class="lang-btn" onclick="setLang('es')" id="lang-es">ES</button>
-    </div>
+    <div id="google_translate_element"></div>
     <button class="hamburger" onclick="toggleMobile()" aria-label="Menu">☰</button>
   </div>
 </header>
@@ -285,11 +289,6 @@ nav{display:none;}
   <a onclick="showPage('timeline');closeMobile()">📅 Timeline</a>
   <a onclick="showPage('dtk');closeMobile()" class="dtk-link">⚔ DTK</a>
   <a onclick="openSearch();closeMobile()">🔍 Search</a>
-  <div style="display:flex;gap:0.3rem;padding:2px 0;">
-    <button class="lang-btn active" onclick="setLang('en');closeMobile()" id="mob-lang-en">EN</button>
-    <button class="lang-btn" onclick="setLang('fr');closeMobile()" id="mob-lang-fr">FR</button>
-    <button class="lang-btn" onclick="setLang('es');closeMobile()" id="mob-lang-es">ES</button>
-  </div>
 </div>
 
 <!-- SEARCH OVERLAY -->
@@ -2006,38 +2005,18 @@ try{
   }
 }catch(e){}
 
-// ── LANGUAGE SWITCHER ──
-const TRANSLATIONS={
-  fr:{'Quick Ref':'Référence','Bear Hunt':'Chasse à l\'ours','Events':'Événements','KvK':'KvK','Heroes':'Héros','Pets':'Animaux','Gear':'Équipement','Power':'Puissance','Timeline':'Calendrier','⚔ DTK':'⚔ DTK','🔍 Search':'🔍 Rechercher','Home':'Accueil','🐻 Bear':'🐻 Ours','Viking Invasion':'Invasion Viking'},
-  es:{'Quick Ref':'Referencia','Bear Hunt':'Caza del oso','Events':'Eventos','KvK':'KvK','Heroes':'Héroes','Pets':'Mascotas','Gear':'Equipo','Power':'Poder','Timeline':'Cronología','⚔ DTK':'⚔ DTK','🔍 Search':'🔍 Buscar','Home':'Inicio','🐻 Bear':'🐻 Oso','Viking Invasion':'Invasión Vikinga'}
-};
-function setLang(lang){
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
-  const btns=document.querySelectorAll('#lang-'+lang+', #mob-lang-'+lang);
-  btns.forEach(b=>b.classList.add('active'));
-  const existing=document.getElementById('lang-banner');
-  if(existing)existing.remove();
-  if(lang!=='en'){
-    const banner=document.createElement('div');
-    banner.id='lang-banner';
-    banner.style.cssText='background:rgba(76,142,201,0.10);border-bottom:1px solid rgba(76,142,201,0.25);padding:0.45rem 1rem;text-align:center;font-family:IBM Plex Mono,monospace;font-size:0.62rem;color:#4c8ec9;letter-spacing:0.08em;position:sticky;top:52px;z-index:150';
-    const msgs={fr:'🇫🇷 Navigation en français · Contenu des guides en anglais pour précision technique',es:'🇪🇸 Navegación en español · Contenido de guías en inglés por precisión técnica'};
-    banner.innerHTML=msgs[lang]+' · <a onclick="setLang(\'en\')" style="color:var(--gold);cursor:pointer;text-decoration:underline">'+(lang==='fr'?'Anglais':'Inglés')+'</a>';
-    document.querySelector('header').after(banner);
-    const T=TRANSLATIONS[lang];
-    document.querySelectorAll('#mainNav a, .mobile-nav a').forEach(a=>{
-      const orig=a.getAttribute('data-en')||a.textContent.trim();
-      a.setAttribute('data-en',orig);
-      if(T[orig])a.textContent=T[orig];
-    });
-  } else {
-    document.querySelectorAll('#mainNav a, .mobile-nav a').forEach(a=>{
-      const orig=a.getAttribute('data-en');
-      if(orig)a.textContent=orig;
-    });
-  }
+// ── LANGUAGE ──
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({
+    pageLanguage:'en',
+    includedLanguages:'fr,es,it,de,pt,nl,ar,zh-CN,ja,ko',
+    layout:google.translate.TranslateElement.InlineLayout.SIMPLE,
+    autoDisplay:false
+  },'google_translate_element');
 }
 </script>
+
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </body>
 </html>
