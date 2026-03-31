@@ -185,7 +185,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem;position:relative;z
 .home-card.p2{border-color:rgba(232,132,58,0.2);}
 
 /* LANGUAGE SWITCHER */
-.lang-switcher{display:flex;gap:0.25rem;align-items:center;}
+.lang-switcher{display:flex;gap:0.25rem;align-items:center;flex-shrink:0;}
 .lang-btn{font-family:‘IBM Plex Mono’,monospace;font-size:0.58rem;padding:3px 7px;border:1px solid var(–border);border-radius:2px;background:none;color:var(–text-muted);cursor:pointer;letter-spacing:0.06em;transition:all 0.15s;}
 .lang-btn:hover{border-color:var(–gold-dim);color:var(–gold);}
 .lang-btn.active{background:rgba(201,168,76,0.12);border-color:var(–gold);color:var(–gold);}
@@ -262,12 +262,12 @@ nav{display:none;}
       <a onclick="showPage('timeline')" id="nav-timeline">Timeline</a>
       <a onclick="showPage('dtk')" id="nav-dtk" class="dtk-link">⚔ DTK</a>
       <a onclick="openSearch()" style="color:var(--text-muted)">🔍</a>
-      <div class="lang-switcher">
-        <button class="lang-btn active" onclick="setLang('en')" id="lang-en">EN</button>
-        <button class="lang-btn" onclick="setLang('fr')" id="lang-fr">FR</button>
-        <button class="lang-btn" onclick="setLang('es')" id="lang-es">ES</button>
-      </div>
     </nav>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')" id="lang-en">EN</button>
+      <button class="lang-btn" onclick="setLang('fr')" id="lang-fr">FR</button>
+      <button class="lang-btn" onclick="setLang('es')" id="lang-es">ES</button>
+    </div>
     <button class="hamburger" onclick="toggleMobile()" aria-label="Menu">☰</button>
   </div>
 </header>
@@ -285,6 +285,11 @@ nav{display:none;}
   <a onclick="showPage('timeline');closeMobile()">📅 Timeline</a>
   <a onclick="showPage('dtk');closeMobile()" class="dtk-link">⚔ DTK</a>
   <a onclick="openSearch();closeMobile()">🔍 Search</a>
+  <div style="display:flex;gap:0.3rem;padding:2px 0;">
+    <button class="lang-btn active" onclick="setLang('en');closeMobile()" id="mob-lang-en">EN</button>
+    <button class="lang-btn" onclick="setLang('fr');closeMobile()" id="mob-lang-fr">FR</button>
+    <button class="lang-btn" onclick="setLang('es');closeMobile()" id="mob-lang-es">ES</button>
+  </div>
 </div>
 
 <!-- SEARCH OVERLAY -->
@@ -1036,6 +1041,9 @@ nav{display:none;}
       </div>
     </div>
   </div>
+
+</main>
+</div>
 
 <!-- ═══ KVK ═══ -->
 
@@ -1955,16 +1963,21 @@ function showGen(n){
 // ── PASSWORD ──
 const DTK_PASS='dtk1246';
 function checkPW(){
-  const val=document.getElementById('pwInput').value.toLowerCase().trim();
+  const input=document.getElementById('pwInput');
+  const gate=document.getElementById('dtk-gate');
+  const content=document.getElementById('dtk-content');
+  const err=document.getElementById('pwError');
+  if(!input||!gate||!content||!err)return;
+  const val=input.value.toLowerCase().trim();
   if(val===DTK_PASS){
-    document.getElementById('dtk-gate').style.display='none';
-    document.getElementById('dtk-content').style.display='block';
-    sessionStorage.setItem('dtk_auth','1');
+    gate.style.display='none';
+    content.style.display='block';
+    try{sessionStorage.setItem('dtk_auth','1');}catch(e){}
   } else {
-    const err=document.getElementById('pwError');
     err.textContent='Incorrect passphrase.';
-    setTimeout(()=>{err.textContent='\u00a0';},2500);
-    document.getElementById('pwInput').value='';
+    input.value='';
+    input.focus();
+    setTimeout(()=>{if(err)err.textContent='\u00a0';},2500);
   }
 }
 // ── TIMELINE DATA ──
@@ -1985,11 +1998,13 @@ function updateTimeline(age){
 updateTimeline(148);
 
 // ── SESSION RESTORE ──
-if(sessionStorage.getItem('dtk_auth')==='1'){
-  const g=document.getElementById('dtk-gate');
-  const c=document.getElementById('dtk-content');
-  if(g&&c){g.style.display='none';c.style.display='block';}
-}
+try{
+  if(sessionStorage.getItem('dtk_auth')==='1'){
+    const g=document.getElementById('dtk-gate');
+    const c=document.getElementById('dtk-content');
+    if(g&&c){g.style.display='none';c.style.display='block';}
+  }
+}catch(e){}
 
 // ── LANGUAGE SWITCHER ──
 const TRANSLATIONS={
@@ -1998,7 +2013,8 @@ const TRANSLATIONS={
 };
 function setLang(lang){
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('lang-'+lang).classList.add('active');
+  const btns=document.querySelectorAll('#lang-'+lang+', #mob-lang-'+lang);
+  btns.forEach(b=>b.classList.add('active'));
   const existing=document.getElementById('lang-banner');
   if(existing)existing.remove();
   if(lang!=='en'){
